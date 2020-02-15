@@ -9,6 +9,7 @@
 #include <OpenGLHeaders/Camera.h>
 #include <OpenGLHeaders/Texture.h>
 #include <OpenGLHeaders/Shader.h>
+#include <string>
 ///VBOs Vertex Buffer Objects contain vertex data that is sent to memory in the GPU, vertex attrib calls config bound VBO
 ///VAOs Vertex Array Objects when bound, any vertex attribute calls and attribute configs are stored in VAO
 ///Having multiple VAOs allow storage of multiple VBO configs, before drawing, binding VAO with right config applies to draw
@@ -28,12 +29,18 @@
 ///Depth information stored in Z buffer, depth testing done automatically, must be enabled
 ///Depth buffer must also be cleared in the clear function
 
+#define NUMBER_OF_LAYERS 5
+#define MIN_STEP 0.001f
+#define STEP_STEP 0.02f
+
 const float W = 800;
 const float H = 600;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 bool restrictY = true;
+
+float step = MIN_STEP;
 
 //Define offset variables
 float lastX = W / 2; float lastY = H / 2;
@@ -47,6 +54,20 @@ Camera camera(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f), yaw, pit
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
+}
+
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+	if(glfwGetKey(window, GLFW_KEY_R)) {
+		step += STEP_STEP;
+	}
+	else if(glfwGetKey(window, GLFW_KEY_E)) {
+		if(step-STEP_STEP > MIN_STEP){
+			step -= STEP_STEP;
+		}
+		else {
+			step = MIN_STEP;
+		}
+	}
 }
 
 void mouse_callback(GLFWwindow *window, double xpos, double ypos)
@@ -93,12 +114,12 @@ int main()
 
 	float vertices[] = {
 		 //Positions          //Normals            //Texture coords
-		-0.5f, -0.5f, -0.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-		 0.5f, -0.5f, -0.0f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.0f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-		 0.5f,  0.5f, -0.0f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.0f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+		-0.9f, -1.2f, -0.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+		 0.9f, -1.2f, -0.0f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+		 0.9f,  1.2f, -0.0f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+		 0.9f,  1.2f, -0.0f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+		-0.9f,  1.2f, -0.0f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+		-0.9f, -1.2f, -0.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
 
 		// -0.5f, -0.5f,  0.0f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
 		//  0.5f, -0.5f,  0.0f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
@@ -177,9 +198,9 @@ int main()
 	// setVec3(lightingShader, "light.ambient", glm::vec3(0.2, 0.2, 0.2));
 	// setVec3(lightingShader, "light.diffuse", glm::vec3(0.5, 0.5, 0.5));
 	// setVec3(lightingShader, "light.specular", glm::vec3(1.0, 1.0, 1.0));
-	setVec3(lightingShader, "light.ambient", glm::vec3(0.2, 0.2, 0.2));
-	setVec3(lightingShader, "light.diffuse", glm::vec3(0.5, 0.5, 0.5));
-	setVec3(lightingShader, "light.specular", glm::vec3(1.0, 1.0, 1.0));
+	setVec3(lightingShader, "light.ambient", glm::vec3(1.0, 1.0, 1.0));
+	setVec3(lightingShader, "light.diffuse", glm::vec3(0.0, 0.0, 0.0));
+	setVec3(lightingShader, "light.specular", glm::vec3(0.0, 0.0, 0.0));
 
 	unsigned int lampProgram = 0;
 	Shader("Shaders/VeShColors.vs", "Shaders/FrShLight.fs", lampProgram);
@@ -192,11 +213,33 @@ int main()
 	glActiveTexture(GL_TEXTURE1);
 	loadTexture(specMap, "images/SpecularContainer.png");
 
+	std::string temp1 = "images/layer";
+	std::string temp2 = ".png";
+	unsigned int layerTextures[NUMBER_OF_LAYERS];
+	glActiveTexture(GL_TEXTURE0);
+	// Load layer textures
+	for(int i = 0; i < NUMBER_OF_LAYERS; i++) {
+		char numChar = '0' + i;
+		std::string path = temp1 + numChar + temp2;
+		char cPath[path.length()];
+		for(int i = 0; i < sizeof(cPath); i++) {
+			cPath[i] = path[i];
+		}
+		unsigned int newTexture;
+		loadTexture(newTexture, cPath);
+		layerTextures[i] = newTexture;
+	}
+
+	glfwSetKeyCallback(window, key_callback);
+
 	glEnable(GL_DEPTH_TEST);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	//Set mouse input callback function
 	void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 	glfwSetCursorPosCallback(window, mouse_callback);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	//Render Loop
 	while (!glfwWindowShouldClose(window))
@@ -224,15 +267,21 @@ int main()
 		projection = glm::perspective(glm::radians(fov), W / H, 0.1f, 100.0f);
 
 		//Pass our matrices to the shader through a uniform
-		setMat4(lightingShader, "model", model);
 		setMat4(lightingShader, "view", view);
 		setMat4(lightingShader, "projection", projection);
 		setVec3(lightingShader, "lightPos", glm::vec3(glm::vec3(sin((float)(glfwGetTime())), 0.0f, cos((float)(glfwGetTime())))));
 		//setVec3(lightingShader, "lightPos", lightPos);
 
-		//Draw cube
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glDrawArrays(GL_TRIANGLES, 0, ARRAY_SIZE(vertices));
+		for(int i = 0; i < NUMBER_OF_LAYERS; i++) {
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, layerTextures[i]);
+			model = glm::translate(model, glm::vec3(0, 0, step*i));
+			setMat4(lightingShader, "model", model);
+			//Draw layer
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			glDrawArrays(GL_TRIANGLES, 0, ARRAY_SIZE(vertices));
+		}
 
 		glUseProgram(lampProgram);
 		glBindVertexArray(lightVAO);
