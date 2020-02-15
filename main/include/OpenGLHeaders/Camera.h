@@ -84,6 +84,10 @@ public:
 				Position -= camspeed*glm::normalize(glm::cross(glm::vec3(Front.x, 0.0f, Front.z), Up));
 			if (glfwGetKey(window, GLFW_KEY_D) || glfwGetKey(window, GLFW_KEY_RIGHT))
 				Position += camspeed*glm::normalize(glm::cross(glm::vec3(Front.x, 0.0f, Front.z), Up));
+			if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL))
+				Position -= camspeed*Up;
+			if (glfwGetKey(window, GLFW_KEY_SPACE))
+				Position += camspeed*Up;
 		}
 		else
 		{
@@ -95,6 +99,10 @@ public:
 				Position -= camspeed*glm::normalize(glm::cross(Front, Up));
 			if (glfwGetKey(window, GLFW_KEY_D) || glfwGetKey(window, GLFW_KEY_RIGHT))
 				Position += camspeed*glm::normalize(glm::cross(Front, Up));
+			if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL))
+				Position -= camspeed * Up;
+			if (glfwGetKey(window, GLFW_KEY_SPACE))
+				Position += camspeed * Up;
 		}
 	}
 

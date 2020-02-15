@@ -32,6 +32,7 @@
 #define NUMBER_OF_LAYERS 5
 #define MIN_STEP 0.001f
 #define STEP_STEP 0.02f
+#define SCROLL_MULTIPLIER 2
 
 const float W = 800;
 const float H = 600;
@@ -49,18 +50,26 @@ bool firstMouse = true;
 float fov = 45.0f;
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
-Camera camera(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f), yaw, pitch);
+Camera camera(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 1.0f, 0.0f), yaw, pitch);
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
 }
 
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
+{
+	if (step-STEP_STEP*yoffset*SCROLL_MULTIPLIER > MIN_STEP)
+		step -= STEP_STEP*yoffset*SCROLL_MULTIPLIER;
+	else
+		step = MIN_STEP;
+}
+
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-	if(glfwGetKey(window, GLFW_KEY_R)) {
+	if(glfwGetKey(window, GLFW_KEY_E)) {
 		step += STEP_STEP;
 	}
-	else if(glfwGetKey(window, GLFW_KEY_E)) {
+	if(glfwGetKey(window, GLFW_KEY_Q)) {
 		if(step-STEP_STEP > MIN_STEP){
 			step -= STEP_STEP;
 		}
@@ -121,40 +130,40 @@ int main()
 		-0.9f,  1.2f, -0.0f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
 		-0.9f, -1.2f, -0.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
 
-		// -0.5f, -0.5f,  0.0f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-		//  0.5f, -0.5f,  0.0f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-		//  0.5f,  0.5f,  0.0f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-		//  0.5f,  0.5f,  0.0f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-		// -0.5f,  0.5f,  0.0f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-		// -0.5f, -0.5f,  0.0f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+		-0.9f, -1.2f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+		 0.9f, -1.2f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
+		 0.9f,  1.2f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+		 0.9f,  1.2f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+		-0.9f,  1.2f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
+		-0.9f, -1.2f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
 
-		// -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-		// -0.5f,  0.5f, -0.0f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-		// -0.5f, -0.5f, -0.0f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		// -0.5f, -0.5f, -0.0f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		// -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-		// -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+		-0.9f,  1.2f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+		-0.9f,  1.2f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+		-0.9f, -1.2f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		-0.9f, -1.2f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		-0.9f, -1.2f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+		-0.9f,  1.2f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-		//  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-		//  0.5f,  0.5f, -0.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-		//  0.5f, -0.5f, -0.0f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		//  0.5f, -0.5f, -0.0f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		//  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-		//  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+		 0.9f,  1.2f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+		 0.9f,  1.2f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+		 0.9f, -1.2f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		 0.9f, -1.2f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		 0.9f, -1.2f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+		 0.9f,  1.2f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-		// -0.5f, -0.5f, -0.0f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-		//  0.5f, -0.5f, -0.0f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-		//  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-		//  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-		// -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-		// -0.5f, -0.5f, -0.0f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+		-0.9f, -1.2f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+		 0.9f, -1.2f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+		 0.9f, -1.2f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+		 0.9f, -1.2f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+		-0.9f, -1.2f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+		-0.9f, -1.2f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
 
-		// -0.5f,  0.5f, -0.0f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-		//  0.5f,  0.5f, -0.0f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-		//  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-		//  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-		// -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-		// -0.5f,  0.5f, -0.0f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+		-0.9f,  1.2f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+		 0.9f,  1.2f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+		 0.9f,  1.2f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+		 0.9f,  1.2f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+		-0.9f,  1.2f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+		-0.9f,  1.2f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
 	};
 	//Create a Vertex Array Object
 	unsigned int VAO;
@@ -231,6 +240,7 @@ int main()
 	}
 
 	glfwSetKeyCallback(window, key_callback);
+	glfwSetScrollCallback(window, scroll_callback);
 
 	glEnable(GL_DEPTH_TEST);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -248,7 +258,7 @@ int main()
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
-		camera.ProcessKeyboard(window, deltaTime, false);
+		camera.ProcessKeyboard(window, deltaTime, true);
 
 		glClearColor(0, 0, 0, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -275,8 +285,10 @@ int main()
 		for(int i = 0; i < NUMBER_OF_LAYERS; i++) {
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glActiveTexture(GL_TEXTURE0);
+			model = glm::mat4();
 			glBindTexture(GL_TEXTURE_2D, layerTextures[i]);
-			model = glm::translate(model, glm::vec3(0, 0, step*i));
+			int shiftedI = i - NUMBER_OF_LAYERS/2;
+			model = glm::translate(model, glm::vec3(0, 0, step*shiftedI));
 			setMat4(lightingShader, "model", model);
 			//Draw layer
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
