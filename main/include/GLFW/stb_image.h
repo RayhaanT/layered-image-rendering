@@ -1115,6 +1115,9 @@ static FILE *stbi__fopen(char const *filename, char const *mode)
 		f = 0;
 #else
 	f = fopen(filename, mode);
+	if(f == NULL) {
+		perror("ERROR");
+	}
 #endif
 	return f;
 }

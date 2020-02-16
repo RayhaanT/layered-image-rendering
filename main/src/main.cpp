@@ -11,6 +11,7 @@
 #include <OpenGLHeaders/Shader.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 ///VBOs Vertex Buffer Objects contain vertex data that is sent to memory in the GPU, vertex attrib calls config bound VBO
 ///VAOs Vertex Array Objects when bound, any vertex attribute calls and attribute configs are stored in VAO
 ///Having multiple VAOs allow storage of multiple VBO configs, before drawing, binding VAO with right config applies to draw
@@ -41,6 +42,18 @@ bool restrictY = true;
 
 float step = MIN_STEP;
 
+struct Layer {
+	unsigned int texture;
+	glm::vec3 position;
+	glm::vec3 offset;
+
+	Layer(unsigned int _texture) {
+		texture = _texture;
+	}
+
+	Layer() {}
+};
+
 //Define offset variables
 float lastX = W / 2; float lastY = H / 2;
 float yaw = -90; float pitch = 0;
@@ -49,6 +62,10 @@ float fov = 45.0f;
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 Camera camera(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 1.0f, 0.0f), yaw, pitch);
+
+bool sortLayers(Layer a, Layer b) {
+	return a.position.z < b.position.z;
+}
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -272,22 +289,26 @@ int main()
 	glActiveTexture(GL_TEXTURE1);
 	loadTexture(specMap, "images/SpecularContainer.png");
 
+	//std::string temp1 = "D:/Libraries/Libraries/GitHub/layered-image-rendering/main/images/layer";
 	std::string temp1 = "images/layer";
 	std::string temp2 = ".png";
-	unsigned int layerTextures[NUMBER_OF_LAYERS];
+	std::vector<Layer> layers;
 	glActiveTexture(GL_TEXTURE0);
 	// Load layer textures
 	for(int i = 0; i < NUMBER_OF_LAYERS; i++) {
-		char numChar = '0' + i;
-		std::string path = temp1 + numChar + temp2;
-		char cPath[path.length()];
-		for(int i = 0; i < sizeof(cPath); i++) {
-			cPath[i] = path[i];
-		}
+		std::string numStr = std::to_string(i);
+		std::string path = temp1 + numStr + temp2;
+		// char cPath[path.length()];
+		// for(int i = 0; i < sizeof(cPath); i++) {
+		// 	cPath[i] = path[i];
+		// }
+		// if(i == 0) {
+		// 	//cPath[strlen(cPath) - 1] = '\0';
+		// }
 		unsigned int newTexture;
-		std::cout << "Loading " << path << std::endl;
-		loadTexture(newTexture, cPath);
-		layerTextures[i] = newTexture;
+		std::cout << "Loading " << path.c_str() << std::endl;
+		loadTexture(newTexture, path.c_str());
+		layers.push_back(Layer(newTexture));
 	}
 
 	glfwSetKeyCallback(window, key_callback);
@@ -335,32 +356,24 @@ int main()
 		setVec3(lightingShader, "lightPos", glm::vec3(glm::vec3(sin((float)(glfwGetTime())), 0.0f, cos((float)(glfwGetTime())))));
 		//setVec3(lightingShader, "lightPos", lightPos);
 
+		std::vector<Layer> sortedLayers = layers;
 		//Sort layers
-		std::vector<unsigned int> sortedLayers;
-		std::vector<glm::vec3> positions;
 		for(int i = 0; i < NUMBER_OF_LAYERS; i++) {
 			int shiftedI = i - NUMBER_OF_LAYERS / 2;
 			glm::vec3 pos = glm::vec3(0.0f, 0.0f, step * shiftedI);
+			sortedLayers[i].offset = pos;
 			pos = glm::vec3(glm::vec4(pos, 0.0f) * rotationModel);
-			if(positions.size() < 1) {
-				positions.push_back(pos);
-				sortedLayers.push_back(layerTextures[i]);
-			}
-			for(int b = 0; b < positions.size(); b++) {
-				if(positions[b].z > pos.z) {
-					//positions = v3Insert(positions, pos, b);
-					//sortedLayers.insert(sortedLayers.begin()+b, layerTextures[i]);
-				}
-			}
+			sortedLayers[i].position = pos;
 		}
+		std::sort(sortedLayers.begin(), sortedLayers.end(), sortLayers);
 
 		for(int i = 0; i < NUMBER_OF_LAYERS; i++) {
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glActiveTexture(GL_TEXTURE0);
 			model = glm::mat4();
-			glBindTexture(GL_TEXTURE_2D, layerTextures[i]);
+			glBindTexture(GL_TEXTURE_2D, sortedLayers[i].texture);
 			int shiftedI = i - NUMBER_OF_LAYERS/2;
-			glm::vec3 v = glm::vec3(0.0f, 0.0f, step * shiftedI);
+			glm::vec3 v = sortedLayers[i].offset;
 			model = glm::translate(model, v);
 			model = rotationModel * model;
 			setMat4(lightingShader, "model", model);

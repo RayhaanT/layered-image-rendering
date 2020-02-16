@@ -28,6 +28,7 @@ void loadTexture(unsigned int &texture, const char *name)
 	}
 	else {
 		std::cout << "Failed to load texture" << std::endl;
+		std::cout << stbi_failure_reason() << std::endl;
 	}
 	stbi_image_free(data);
 }
