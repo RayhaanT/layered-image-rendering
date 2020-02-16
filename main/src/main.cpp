@@ -181,8 +181,23 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	//Create a GLFW Window
-	GLFWwindow* window = glfwCreateWindow(W, H, "Exploded Rendering", NULL, NULL);
+	// Create a GLFW Window
+	// Regular small window
+	// GLFWwindow* window = glfwCreateWindow(W, H, "Exploded Rendering", NULL, NULL);
+	// glfwMakeContextCurrent(window);
+
+	// Borderless fulscreen window
+	const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+	glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+	glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+	glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+	glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+	W = mode->width;
+	H = mode->height;
+
+	GLFWwindow *window = glfwCreateWindow(mode->width, mode->height, "My Title", glfwGetPrimaryMonitor(), NULL);
 	glfwMakeContextCurrent(window);
 
 	//glad init: intializes all OpenGL function pointers

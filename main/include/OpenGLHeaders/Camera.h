@@ -23,8 +23,8 @@ enum Camera_Movement
 #define C_PI 3.14159265359
 
 // Default camera values
-const float W = 800;
-const float H = 600;
+float W = 800;
+float H = 600;
 const float YAW = 0.0f;
 const float PITCH = 0.0f;
 const float SPEED = 2.5f;
