@@ -61,6 +61,9 @@ bool firstMouse = true;
 float fov = 45.0f;
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
+bool blackBackground = true;
+bool rHeld = false;
+
 Camera camera(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 1.0f, 0.0f), yaw, pitch);
 
 bool sortLayers(Layer a, Layer b) {
@@ -99,6 +102,13 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 	if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)) {
 		camera.ProcessMouseScroll(window, -1);
 	}
+
+	if(glfwGetKey(window, GLFW_KEY_R) && !rHeld) {
+		blackBackground = !blackBackground;
+		rHeld = true;
+	}
+	else
+		rHeld = false;
 }
 
 void mouse_callback(GLFWwindow *window, double xpos, double ypos)
@@ -172,7 +182,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	//Create a GLFW Window
-	GLFWwindow* window = glfwCreateWindow(W, H, "Colors", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(W, H, "Exploded Rendering", NULL, NULL);
 	glfwMakeContextCurrent(window);
 
 	//glad init: intializes all OpenGL function pointers
@@ -334,7 +344,10 @@ int main()
 		camera.ProcessKeyboard(window, deltaTime, true);
 		glm::mat4 rotationModel = camera.GetArcMatrix();
 
-		glClearColor(0, 0, 0, 1);
+		if(blackBackground)
+			glClearColor(0, 0, 0, 1);
+		else
+			glClearColor(1, 1, 1, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glUseProgram(lightingShader);
