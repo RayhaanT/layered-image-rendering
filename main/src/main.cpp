@@ -10,6 +10,7 @@
 #include <OpenGLHeaders/Texture.h>
 #include <OpenGLHeaders/Shader.h>
 #include <string>
+#include <vector>
 ///VBOs Vertex Buffer Objects contain vertex data that is sent to memory in the GPU, vertex attrib calls config bound VBO
 ///VAOs Vertex Array Objects when bound, any vertex attribute calls and attribute configs are stored in VAO
 ///Having multiple VAOs allow storage of multiple VBO configs, before drawing, binding VAO with right config applies to draw
@@ -117,6 +118,33 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 			clicked = false;
 	}
 }
+
+std::vector<glm::vec3> v3Insert(std::vector<glm::vec3> v, glm::vec3 in, int index) {
+	v.push_back(glm::vec3(0.0f));
+	for(int i = v.size()-1; i > index-1; i++) {
+		if(i == index) {
+			v[i] = in;
+		}
+		else {
+			v[i] = v[i-1]; 
+		}
+	}
+	return v;
+}
+
+std::vector<unsigned int> uiInsert(std::vector<unsigned int> v, unsigned int in, int index) {
+	v.push_back(0);
+	for(int i = v.size()-1; i > index-1; i++) {
+		if(i == index) {
+			v[i] = in;
+		}
+		else {
+			v[i] = v[i]-1; 
+		}
+	}
+	return v;
+}
+
 
 int main()
 {
@@ -257,6 +285,7 @@ int main()
 			cPath[i] = path[i];
 		}
 		unsigned int newTexture;
+		std::cout << "Loading " << path << std::endl;
 		loadTexture(newTexture, cPath);
 		layerTextures[i] = newTexture;
 	}
@@ -305,6 +334,25 @@ int main()
 		setMat4(lightingShader, "projection", projection);
 		setVec3(lightingShader, "lightPos", glm::vec3(glm::vec3(sin((float)(glfwGetTime())), 0.0f, cos((float)(glfwGetTime())))));
 		//setVec3(lightingShader, "lightPos", lightPos);
+
+		//Sort layers
+		std::vector<unsigned int> sortedLayers;
+		std::vector<glm::vec3> positions;
+		for(int i = 0; i < NUMBER_OF_LAYERS; i++) {
+			int shiftedI = i - NUMBER_OF_LAYERS / 2;
+			glm::vec3 pos = glm::vec3(0.0f, 0.0f, step * shiftedI);
+			pos = glm::vec3(glm::vec4(pos, 0.0f) * rotationModel);
+			if(positions.size() < 1) {
+				positions.push_back(pos);
+				sortedLayers.push_back(layerTextures[i]);
+			}
+			for(int b = 0; b < positions.size(); b++) {
+				if(positions[b].z > pos.z) {
+					//positions = v3Insert(positions, pos, b);
+					//sortedLayers.insert(sortedLayers.begin()+b, layerTextures[i]);
+				}
+			}
+		}
 
 		for(int i = 0; i < NUMBER_OF_LAYERS; i++) {
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
