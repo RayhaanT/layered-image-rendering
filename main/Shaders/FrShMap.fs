@@ -21,7 +21,6 @@ in vec3 FragPos;
 in vec3 LightPos;
 in vec2 TexCoords;
 
-uniform vec3 lightColor;
 uniform Material material;
 uniform Light light;
 

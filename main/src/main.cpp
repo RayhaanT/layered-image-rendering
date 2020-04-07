@@ -182,23 +182,21 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Create a GLFW Window
+
 	// Regular small window
-	// GLFWwindow* window = glfwCreateWindow(W, H, "Exploded Rendering", NULL, NULL);
-	// glfwMakeContextCurrent(window);
+	GLFWwindow  *window = glfwCreateWindow(W, H, "Exploded Rendering", NULL, NULL);
+	glfwMakeContextCurrent(window);
 
 	// Borderless fulscreen window
-	const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-
-	glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-	glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-	glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-	glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
-
-	W = mode->width;
-	H = mode->height;
-
-	GLFWwindow *window = glfwCreateWindow(mode->width, mode->height, "My Title", glfwGetPrimaryMonitor(), NULL);
-	glfwMakeContextCurrent(window);
+	// const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	// glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+	// glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+	// glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+	// glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+	// W = mode->width;
+	// H = mode->height;
+	// GLFWwindow *window = glfwCreateWindow(mode->width, mode->height, "Exploded Rendering", glfwGetPrimaryMonitor(), NULL);
+	// glfwMakeContextCurrent(window);
 
 	//glad init: intializes all OpenGL function pointers
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -242,42 +240,15 @@ int main()
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
-	//Create light cube VAO
-	unsigned int lightVAO;
-	glGenVertexArrays(1, &lightVAO);
-	glBindVertexArray(lightVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glm::vec3 objectColour = glm::vec3(1.0f, 0.5f, 0.31f);
-	glm::vec3 lightColour = glm::vec3(1.0f, 1.0f, 1.0f);
-
 	unsigned int lightingShader = 0;
 	Shader("Shaders/VeShMap.vs", "Shaders/FrShMap.fs", lightingShader);
 	glUseProgram(lightingShader);
-	setVec3(lightingShader, "objectColor", objectColour);
-	setVec3(lightingShader, "lightColor", lightColour);
 	setInt(lightingShader, "material.diffuse", 0);
 	setInt(lightingShader, "material.specular", 1);
 	setFloat(lightingShader, "material.shininess", 32.0f);
-	// setVec3(lightingShader, "light.ambient", glm::vec3(0.2, 0.2, 0.2));
-	// setVec3(lightingShader, "light.diffuse", glm::vec3(0.5, 0.5, 0.5));
-	// setVec3(lightingShader, "light.specular", glm::vec3(1.0, 1.0, 1.0));
 	setVec3(lightingShader, "light.ambient", glm::vec3(1.0, 1.0, 1.0));
 	setVec3(lightingShader, "light.diffuse", glm::vec3(0.0, 0.0, 0.0));
 	setVec3(lightingShader, "light.specular", glm::vec3(0.0, 0.0, 0.0));
-
-	unsigned int lampProgram = 0;
-	Shader("Shaders/VeShColors.vs", "Shaders/FrShLight.fs", lampProgram);
-
-	unsigned int diffMap;
-	glActiveTexture(GL_TEXTURE0);
-	loadTexture(diffMap, "images/Container.png");
-	
-	unsigned int specMap;
-	glActiveTexture(GL_TEXTURE1);
-	loadTexture(specMap, "images/SpecularContainer.png");
 
 	//std::string temp1 = "D:/Libraries/Libraries/GitHub/layered-image-rendering/main/images/layer";
 	std::string temp1 = "images/layer";
@@ -288,13 +259,6 @@ int main()
 	for(int i = 0; i < NUMBER_OF_LAYERS; i++) {
 		std::string numStr = std::to_string(i);
 		std::string path = temp1 + numStr + temp2;
-		// char cPath[path.length()];
-		// for(int i = 0; i < sizeof(cPath); i++) {
-		// 	cPath[i] = path[i];
-		// }
-		// if(i == 0) {
-		// 	//cPath[strlen(cPath) - 1] = '\0';
-		// }
 		unsigned int newTexture;
 		std::cout << "Loading " << path.c_str() << std::endl;
 		loadTexture(newTexture, path.c_str());
@@ -332,9 +296,6 @@ int main()
 
 		glUseProgram(lightingShader);
 		glBindVertexArray(VAO);
-
-		glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, diffMap);
-		glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, specMap);
 
 		glm::mat4 model;
 		//model = glm::rotate(model, (float)(glfwGetTime()) * 2, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -374,19 +335,6 @@ int main()
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			glDrawArrays(GL_TRIANGLES, 0, ARRAY_SIZE(vertices));
 		}
-
-		glUseProgram(lampProgram);
-		glBindVertexArray(lightVAO);
-
-		model = glm::mat4();
-		//model = glm::translate(model, lightPos);
-		model = glm::scale(model, glm::vec3(0.2f));
-
-		setMat4(lampProgram, "model", model);
-		setMat4(lampProgram, "view", view);
-		setMat4(lampProgram, "projection", projection);
-
-		//glDrawArrays(GL_TRIANGLES, 0, ARRAY_SIZE(vertices));
 
 		//Swap buffer and poll IO events
 		glfwSwapBuffers(window);
