@@ -5,5 +5,4 @@ The exploded view render can be rotated, scaled and the distance between layers 
 Build command (in the main folder):
 ```
 g++ -g src/*.cpp src/*.c -static -Iinclude -iquote include -Llib -lopengl32 -lglfw3 -lgdi32 -o render
-
 ```
